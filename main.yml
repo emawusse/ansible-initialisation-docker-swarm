@@ -9,7 +9,7 @@
       include_vars: group_vars/all.yml
 
     - name: Installation de docker 
-      include: docker.yml
+      include: tasks/docker.yml
 
     - name: Initialisation du cluster_swarm
-      include: swarm.yml
+      include: tasks/swarm.yml
