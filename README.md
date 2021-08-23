@@ -9,5 +9,5 @@ Ce projet comporte des playbooks pour l'installation de docker et l'initialisati
 
 Vous devez cloner le projet : git clone https://github.com/enassar225/ansible-initialisation-cluster-swarm et : 
 - Mettre vos variables dans le fichier all.yml qui se trouve dans le dossier group_vars.yml
-- Mettre à jour le fichier inventaire selon vos instances
+- Mettre à jour le fichier inventory.yml selon vos instances
 - Exécutez : ansible-playbook -i inventory.yml main.yml
