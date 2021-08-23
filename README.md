@@ -1,4 +1,4 @@
-# Ansible-Install-Docker-Initialisation-Docker-Swarm
+# Ansible-Initialisation-Docker-Swarm
 
 Ce projet comporte des playbooks pour l'installation de docker et l'initialisation de docker-swarm à n noeuds managers et n noeuds workers
 
