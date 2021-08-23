@@ -5,7 +5,7 @@
   tasks:
 
     #forcer mon fichier de variable
-    - name: Include variables from vars.yml
+    - name: Include variables from group_vars/all.yml
       include_vars: group_vars/all.yml
 
     - name: Installation de docker 
