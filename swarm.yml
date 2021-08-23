@@ -80,6 +80,5 @@
 - name: Ajouter un Worker au cluster
   command: >
           docker swarm join --token {{ docker_swarm_worker_token.stdout }} {{ docker_swarm_manager_address }}:2377
-
   when: >
         inventory_hostname in groups.workers and 'Swarm: active' not in docker_info.stdout and 'Swarm: pending' not in docker_info.stdout
