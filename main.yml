@@ -1,0 +1,15 @@
+- become: yes
+  hosts: all
+  remote_user: root
+  name: Installation de docker & Initialisation du cluster swarm
+  tasks:
+
+    #forcer mon fichier de variable
+    - name: Include variables from vars.yml
+      include_vars: group_vars/all.yml
+
+    - name: Installation de docker 
+      include: docker.yml
+
+    - name: Initialisation du cluster_swarm
+      include: swarm.yml

@@ -1,0 +1,85 @@
+#Verifier que le service docker est actif
+- name: pre-requis | S'assurer que Docker est running
+  service:
+    name: "docker"
+    state: "started"
+
+#Enregistrer le statut du Swarm 
+- name: Enregistrer le statut du Swarm
+  command: docker info
+  register: docker_info
+  changed_when: false
+  check_mode: no
+
+#Recupérer l'adresse ip du noeud master si c'est le leader
+- name: Recupérer l'adresse ip du noeud master si c'est le leader
+  set_fact:
+    docker_swarm_manager_address: "{{ hostvars[inventory_hostname]['ansible_' + swarm_interface]['ipv4']['address'] }}"
+  changed_when: false
+  when: >
+        inventory_hostname == groups.managers[0]
+
+#Initialiser le Swarm si le statut est inactif 
+- name: Initialiser le Swarm si le statut est inactif 
+  command: >
+          docker swarm init --advertise-addr {{ docker_swarm_manager_address }}
+  when: >
+        'Swarm: inactive' in docker_info.stdout and inventory_hostname == groups.managers[0] 
+
+#Recupérer l'adresse ip du noeud master en etant sur les workers ou les managers
+- name: Recupérer l'adresse ip du noeud master en etant sur les workers ou les managers
+  set_fact:
+    docker_swarm_manager_address: "{{ hostvars[groups.managers[0]]['docker_swarm_manager_address'] }}"
+  changed_when: false
+  when: >
+        inventory_hostname != groups.managers[0]
+
+#Enregistrer le token pour un noeud manager en etant sur le leader
+- name: Enregistrer le token pour un noeud manager 
+  command: "docker swarm join-token -q manager"
+  changed_when: false
+  register: "docker_swarm_manager_token"
+  become: true
+  when: >
+        inventory_hostname == groups.managers[0]
+
+#Enregistrer le token pour un noeud worker en etant sur le leader
+- name: Enregistrer le token pour un noeud worker
+  command: "docker swarm join-token -q worker"
+  changed_when: false
+  register: "docker_swarm_worker_token"
+  when: >
+        inventory_hostname == groups.managers[0]
+
+#Enregistrer le token pour un noeud manager en étant sur un autre noeud à part le leader
+- name: cluster | Defining Docker Swarm Manager join-token
+  set_fact:
+    docker_swarm_manager_token: "{{ hostvars[groups.managers[0]]['docker_swarm_manager_token'] }}"
+  changed_when: false
+  when: >
+        inventory_hostname != groups.managers[0]
+
+#Enregistrer le token pour un noeud worker en étant sur un autre noeud à part le leader
+- name: Definir le jeton de jointure du worker
+  set_fact:
+    docker_swarm_worker_token: "{{ hostvars[groups.managers[0]]['docker_swarm_worker_token'] }}"
+  changed_when: false
+  when: >
+        inventory_hostname != groups.managers[0]
+
+#Ajouter un manager au cluster 
+- name: cluster | Joining Additional Docker Swarm Managers To Cluster
+  command: >
+          docker swarm join --token {{ docker_swarm_manager_token.stdout }} {{ docker_swarm_manager_address }}:2377
+  become: true
+  when: >
+        inventory_hostname != groups.managers[0] and inventory_hostname not in groups.workers and
+        'Swarm: active' not in docker_info.stdout and 'Swarm: pending' not in docker_info.stdout
+
+#Ajouter un Worker au cluster 
+- name: Ajouter un Worker au cluster
+  command: >
+          docker swarm join --token {{ docker_swarm_worker_token.stdout }} {{ docker_swarm_manager_address }}:2377
+
+  when: >
+        inventory_hostname in groups.workers and 'Swarm: active' not in docker_info.stdout and 'Swarm: pending' not in docker_info.stdout

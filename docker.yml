@@ -1,0 +1,76 @@
+- name: Install Docker OS CentOS
+  block:
+    - name: Upgrade all packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: "Install yum utils"
+      yum:
+        name: yum-utils
+        state: latest
+
+    - name: "Configuring docker-ce repo"
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docker-ce.repo
+        mode: 0644
+
+    - name: "Installing Docker latest version"
+      package:
+        name:
+          - docker-ce 
+          - docker-ce-cli
+          - containerd.io
+        state: latest
+        
+  when: ansible_distribution == "CentOS"
+
+- name: Installation de Docker OS Ubuntu
+  block:
+    - name: Upgrade all packages
+      apt:
+        name: '*'
+        state: latest
+
+    - name: "Installing Packages"
+      package:
+        name:
+          - apt-transport-https 
+          - ca-certificates 
+          - curl
+          - gnupg
+          - lsb-release
+        state: latest
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present    
+
+    - name: Add apt repository for stable version
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present  
+
+    - name: "Installing Docker latest version"
+      package:
+        name:
+          - docker-ce 
+          - docker-ce-cli
+          - containerd.io
+        state: latest
+  when: ansible_distribution == "Ubuntu"
+
+- name: "Starting and Enabling Docker service"
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Add the current user to the docker group
+  user:
+    name: "{{ ansible_ssh_user }}"
+    groups: docker
+    state: present
+    
