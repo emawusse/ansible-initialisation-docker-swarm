@@ -1,20 +1,24 @@
-- name: Create a persistent volume for portainer
-  file:
-    path: "{{ volume_path }}/portainer"
-    state: directory
-    mode: '0755'
+- name: Install Portainer
+  block:
+    - name: Create a persistent volume for portainer
+      file:
+        path: "{{ volume_path }}/portainer"
+        state: directory
+        mode: '0755'
 
-- name: Create a directory for portainer on /opt
-  file:
-    path: /opt/portainer
-    state: directory
-    mode: '0755'
+    - name: Create a directory for portainer on /opt
+      file:
+        path: /opt/portainer
+        state: directory
+        mode: '0755'
 
-- name: Add a docker-compose.yml.j2 on directory
-  template:
-    src: ../templates/docker-compose.j2
-    dest: /opt/portainer/docker-compose.yml
-    mode: '0755'
+    - name: Add a docker-compose.yml.j2 on directory
+      template:
+        src: ../templates/docker-compose.j2
+        dest: /opt/portainer/docker-compose.yml
+        mode: '0755'
 
-- name: Deploy Portainer
-  shell: VOLUME_PATH="{{ volume_path }}" docker stack deploy -c /opt/portainer/docker-compose.yml portainer
+    - name: Deploy Portainer
+      shell: VOLUME_PATH="{{ volume_path }}" docker stack deploy -c /opt/portainer/docker-compose.yml portainer
+  when: >
+        inventory_hostname == groups.managers[0]

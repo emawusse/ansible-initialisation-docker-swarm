@@ -8,11 +8,11 @@
     - name: Include variables from group_vars/all.yml
       include_vars: group_vars/all.yml
 
-    - name: Installation de docker 
-      include: tasks/docker.yml
+    # - name: Installation de docker 
+    #   include: tasks/docker.yml
 
-    - name: Initialisation du cluster_swarm
-      include: tasks/swarm.yml
+    # - name: Initialisation du cluster_swarm
+    #   include: tasks/swarm.yml
 
     - name: Déploiement de portainer
       include: tasks/portainer.yml
