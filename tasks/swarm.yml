@@ -19,13 +19,6 @@
   when: >
         inventory_hostname == groups.managers[0]
 
-#Initialiser le Swarm si le statut est inactif 
-- name: Initialiser le Swarm si le statut est inactif 
-  command: >
-          docker swarm init --advertise-addr {{ docker_swarm_manager_address }}
-  when: >
-        'Swarm: inactive' in docker_info.stdout and inventory_hostname == groups.managers[0] 
-
 #Recupérer l'adresse ip du noeud master en etant sur les workers ou les managers
 - name: Recupérer l'adresse ip du noeud master en etant sur les workers ou les managers
   set_fact:
@@ -34,6 +27,13 @@
   when: >
         inventory_hostname != groups.managers[0]
 
+#Initialiser le Swarm si le statut est inactif 
+- name: Initialiser le Swarm si le statut est inactif 
+  command: >
+          docker swarm init --advertise-addr {{ docker_swarm_manager_address }}
+  when: >
+        'Swarm: inactive' in docker_info.stdout and inventory_hostname == groups.managers[0] 
+        
 #Enregistrer le token pour un noeud manager en etant sur le leader
 - name: Enregistrer le token pour un noeud manager 
   command: "docker swarm join-token -q manager"
@@ -68,7 +68,7 @@
         inventory_hostname != groups.managers[0]
 
 #Ajouter un manager au cluster 
-- name: cluster | Joining Additional Docker Swarm Managers To Cluster
+- name: Ajouter un manager au cluster
   command: >
           docker swarm join --token {{ docker_swarm_manager_token.stdout }} {{ docker_swarm_manager_address }}:2377
   become: true

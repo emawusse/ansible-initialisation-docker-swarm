@@ -1,7 +1,7 @@
 - become: yes
   hosts: all
   remote_user: root
-  name: Installation de docker & Initialisation du cluster swarm
+  name: Installation de docker & Initialisation du cluster swarm & Installation de portainer
   tasks:
 
     #forcer mon fichier de variable
@@ -13,3 +13,6 @@
 
     - name: Initialisation du cluster_swarm
       include: tasks/swarm.yml
+
+    - name: Déploiement de portainer
+      include: tasks/portainer.yml

@@ -1,3 +1,4 @@
-ansible_ssh_user: x
-ansible_ssh_private_key_file: x
-swarm_interface: x
+ansible_ssh_user: ubuntu
+ansible_ssh_private_key_file: /home/enassar/.ssh/k8s
+swarm_interface: ens3
+volume_path: /data
